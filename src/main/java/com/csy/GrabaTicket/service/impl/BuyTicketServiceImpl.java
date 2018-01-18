@@ -50,6 +50,8 @@ public class BuyTicketServiceImpl implements IBuyTicketService {
 	
 	@Autowired
 	private IImageService imageService;
+	@Autowired
+	private HttpKeepSessionUtil httpService;
 	
 	@SuppressWarnings("unchecked")
 	@Override
@@ -62,8 +64,8 @@ public class BuyTicketServiceImpl implements IBuyTicketService {
 			if(stationCodes.get(preOrderModel.getToCity()) == null) {
 				throw new RuntimeException("目标城市不存在");
 			}
-			HttpKeepSessionUtil.get(url1);
-			byte[] result = HttpKeepSessionUtil.get(url2.replace("${trainDate}", preOrderModel.getTrainDate())
+			httpService.get(url1);
+			byte[] result = httpService.get(url2.replace("${trainDate}", preOrderModel.getTrainDate())
 										.replace("${from}", stationCodes.get(preOrderModel.getFromCity()).getCode())
 										.replace("${to}", stationCodes.get(preOrderModel.getToCity()).getCode()));
 			addCookieByQueryZ(preOrderModel, stationCodes);
@@ -79,7 +81,7 @@ public class BuyTicketServiceImpl implements IBuyTicketService {
 					}
 					String res = sendSubmitOrderRequest(t,preOrderModel);
 					if(res.indexOf("200") > 0) {
-						res = HttpKeepSessionUtil.post(url4, "_json_att=");
+						res = httpService.post(url4, "_json_att=");
 						log.info(res);
 						Map<String,String> cachData = new HashMap<>();
 						getInitDcData(res,cachData);
@@ -170,7 +172,7 @@ public class BuyTicketServiceImpl implements IBuyTicketService {
 				String params = "&randCode=" +  imgCoordinates +
 						"&_json_att=&rand=randp" + 
 						"&REPEAT_SUBMIT_TOKEN=" + repeatSubmitToken ;
-				String res = HttpKeepSessionUtil.post(url11, params);
+				String res = httpService.post(url11, params);
 				if(res.indexOf("FALSE") > 0) {
 					return false;
 				} else {
@@ -188,7 +190,7 @@ public class BuyTicketServiceImpl implements IBuyTicketService {
 	public List<String> listUser() {
 		List<String> users = new ArrayList<>();
 		try {
-			String res = HttpKeepSessionUtil.post(url12, "pageIndex=1&pageSize=1000");
+			String res = httpService.post(url12, "pageIndex=1&pageSize=1000");
 			if(res.equals("")) {
 				return users;
 			}
@@ -215,7 +217,7 @@ public class BuyTicketServiceImpl implements IBuyTicketService {
 			int i = 10;
 			while(i>0) {
 				i--;
-				byte[] b = HttpKeepSessionUtil.get(url9.replace("${stampTime}", System.currentTimeMillis()/1000 + "")
+				byte[] b = httpService.get(url9.replace("${stampTime}", System.currentTimeMillis()/1000 + "")
 																			.replace("${REPEAT_SUBMIT_TOKEN}", confirmOrderModel.getRepeatSubmitToken())); 
 				String res = new String(b,"UTF-8");
 				log.info(res);
@@ -245,7 +247,7 @@ public class BuyTicketServiceImpl implements IBuyTicketService {
 				String params = "&orderSequence_no=" +  orderId +
 								"&_json_att=" + 
 								"&REPEAT_SUBMIT_TOKEN=" + repeatSubmitToken ;
-				String res = HttpKeepSessionUtil.post(url10, params);
+				String res = httpService.post(url10, params);
 				log.info(res);
 				Map data = (Map)(mapper.readValue(res, HashMap.class).get("data"));
 				if((Boolean)data.get("submitStatus")){
@@ -271,7 +273,7 @@ public class BuyTicketServiceImpl implements IBuyTicketService {
 					"&train_location=" + confirmOrderModel.getTrainLocation() +
 					"&key_check_isChange=" + confirmOrderModel.getKeyCheckIsChange() +
 					"&leftTicketStr=" + confirmOrderModel.getLeftTicketStr();
-			String res = HttpKeepSessionUtil.post(url8, params);
+			String res = httpService.post(url8, params);
 			log.info(res);
 			return res;
 		} catch (Exception e) {
@@ -287,7 +289,7 @@ public class BuyTicketServiceImpl implements IBuyTicketService {
 					"&tour_flag=dc&purpose_codes=ADULT" + 
 					"&query_from_station_name=" + preOrderModel.getFromCity() +
 					"&query_to_station_name=" + preOrderModel.getToCity() +"&undefined";
-			String res = HttpKeepSessionUtil.post(url3, params);
+			String res = httpService.post(url3, params);
 			log.info(res);
 			return res;
 		} catch (Exception e) {
@@ -303,7 +305,7 @@ public class BuyTicketServiceImpl implements IBuyTicketService {
 					"&oldPassengerStr=" + preOrderModel.getOldPassengerStr() + 
 					"&tour_flag=dc&randCode=&whatsSelect=1&_json_att=" + 
 					"&REPEAT_SUBMIT_TOKEN=" + cachData.get("globalRepeatSubmitToken");
-			String res = HttpKeepSessionUtil.post(url6, params);
+			String res = httpService.post(url6, params);
 			log.info(res);
 			return res;
 		} catch (Exception e) {
@@ -350,12 +352,12 @@ public class BuyTicketServiceImpl implements IBuyTicketService {
 	
 	private void addCookieByQueryZ(PreOrderModel preOrderModel,Map<String,StationCode> data) {
 		try {
-			HttpKeepSessionUtil.addCookie("_jc_save_toDate", (new SimpleDateFormat("yyyy-MM-dd")).format(new Date()), domain, "");
-			HttpKeepSessionUtil.addCookie("_jc_save_fromDate", preOrderModel.getTrainDate(), domain, "");
-			HttpKeepSessionUtil.addCookie("_jc_save_wfdc_flag", "dc", domain, "");
-			HttpKeepSessionUtil.addCookie("_jc_save_toStation", URLEncoder.encode(preOrderModel.getToCity() + "," + data.get(preOrderModel.getToCity()).getCode(),"UTF-8"), domain, "");
-			HttpKeepSessionUtil.addCookie("_jc_save_fromStation", URLEncoder.encode(preOrderModel.getFromCity() + "," + data.get(preOrderModel.getFromCity()).getCode(),"UTF-8"), domain, "");
-			HttpKeepSessionUtil.addCookie("_jc_save_showIns", "true", domain, "");
+			httpService.addCookie("_jc_save_toDate", (new SimpleDateFormat("yyyy-MM-dd")).format(new Date()), domain, "");
+			httpService.addCookie("_jc_save_fromDate", preOrderModel.getTrainDate(), domain, "");
+			httpService.addCookie("_jc_save_wfdc_flag", "dc", domain, "");
+			httpService.addCookie("_jc_save_toStation", URLEncoder.encode(preOrderModel.getToCity() + "," + data.get(preOrderModel.getToCity()).getCode(),"UTF-8"), domain, "");
+			httpService.addCookie("_jc_save_fromStation", URLEncoder.encode(preOrderModel.getFromCity() + "," + data.get(preOrderModel.getFromCity()).getCode(),"UTF-8"), domain, "");
+			httpService.addCookie("_jc_save_showIns", "true", domain, "");
 		} catch (Exception e) {
 			e.printStackTrace();
 			throw new RuntimeException(e.getMessage());
@@ -366,7 +368,7 @@ public class BuyTicketServiceImpl implements IBuyTicketService {
 	public String getImage() {
 		byte[] imgData;
 		try {
-			imgData = HttpKeepSessionUtil.get(url7);
+			imgData = httpService.get(url7);
 			String path = imageService.upload(imgData);
 			return path;
 		} catch (Exception e) {

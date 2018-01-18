@@ -26,25 +26,34 @@ import org.apache.http.impl.client.DefaultRedirectStrategy;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.cookie.BasicClientCookie;
 import org.apache.http.util.EntityUtils;
+import org.springframework.context.annotation.Scope;
+import org.springframework.context.annotation.ScopedProxyMode;
+import org.springframework.stereotype.Service;
 
 /**
  * 保持同一session的HttpClient工具类
  * @author zhangwenchao
  *
  */
+@Service
+@Scope(value="session", proxyMode=ScopedProxyMode.TARGET_CLASS)
 public class HttpKeepSessionUtil {
 
 	private static final Log LOG = LogFactory.getLog(HttpClient.class);
-	public  static CloseableHttpClient httpClient = null;
-	public  static HttpClientContext context = null;
-	public  static CookieStore cookieStore = null;
-	public  static RequestConfig requestConfig = null;
+	public  CloseableHttpClient httpClient = null;
+	public  HttpClientContext context = null;
+	public  CookieStore cookieStore = null;
+	public  RequestConfig requestConfig = null;
 
-	static {
+//	static {
+//		init();
+//	}
+	
+	public HttpKeepSessionUtil() {
 		init();
 	}
 
-	private static void init() {
+	private void init() {
 		context = HttpClientContext.create();
 		cookieStore = new BasicCookieStore();
 		// 配置超时时间（连接服务端超时1秒，请求数据返回超时2秒）
@@ -65,7 +74,7 @@ public class HttpKeepSessionUtil {
 	 * @throws ClientProtocolException
 	 * @throws IOException
 	 */
-	public static byte[] get(String url) throws ClientProtocolException, IOException {
+	public byte[] get(String url) throws ClientProtocolException, IOException {
 		HttpGet httpget = new HttpGet(url);
 		CloseableHttpResponse response = httpClient.execute(httpget, context);
 		try {
@@ -92,7 +101,7 @@ public class HttpKeepSessionUtil {
 	 * @throws ClientProtocolException
 	 * @throws IOException
 	 */
-	public static String post(String url, String parameters)
+	public String post(String url, String parameters)
 			throws ClientProtocolException, IOException {
 		HttpPost httpPost = new HttpPost(url);
 		httpPost.setEntity(new StringEntity(parameters, "UTF-8"));
@@ -118,7 +127,7 @@ public class HttpKeepSessionUtil {
 	 * @param domain
 	 * @param path
 	 */
-	public static void addCookie(String name, String value, String domain, String path) {
+	public void addCookie(String name, String value, String domain, String path) {
 		BasicClientCookie cookie = new BasicClientCookie(name, value);
 		cookie.setDomain(domain);
 		cookie.setPath(path);
@@ -132,7 +141,7 @@ public class HttpKeepSessionUtil {
 	 * @throws ParseException
 	 * @throws IOException
 	 */
-	public static void printResponse(HttpResponse httpResponse) throws ParseException, IOException {
+	public void printResponse(HttpResponse httpResponse) throws ParseException, IOException {
 		// 获取响应消息实体
 //		HttpEntity entity = httpResponse.getEntity();
 		// 响应状态
@@ -156,7 +165,7 @@ public class HttpKeepSessionUtil {
 	 * 把当前cookie从控制台输出出来
 	 * 
 	 */
-	public static void printCookies() {
+	public void printCookies() {
 		System.out.println("headers:");
 		cookieStore = context.getCookieStore();
 		List<Cookie> cookies = cookieStore.getCookies();
@@ -171,7 +180,7 @@ public class HttpKeepSessionUtil {
 	 * @param key
 	 * @return
 	 */
-	public static boolean checkCookie(String key) {
+	public boolean checkCookie(String key) {
 		cookieStore = context.getCookieStore();
 		List<Cookie> cookies = cookieStore.getCookies();
 		boolean res = false;
@@ -192,7 +201,7 @@ public class HttpKeepSessionUtil {
 	 * @throws ParseException
 	 * @throws IOException
 	 */
-	public static String toString(CloseableHttpResponse httpResponse) throws ParseException, IOException {
+	public String toString(CloseableHttpResponse httpResponse) throws ParseException, IOException {
 		// 获取响应消息实体
 		HttpEntity entity = httpResponse.getEntity();
 		if (entity != null)

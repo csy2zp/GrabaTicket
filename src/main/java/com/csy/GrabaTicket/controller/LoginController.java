@@ -17,7 +17,8 @@ public class LoginController {
 	private ILoginService loginService;
 	
 	@GetMapping("/login")
-	public String getLogin(Model model) {
+	public String getLogin(Model model,HttpServletRequest request) {
+		request.getSession();
 		String imgPath = loginService.init();
 		model.addAttribute("image", imgPath);
 		return "login";
@@ -38,7 +39,8 @@ public class LoginController {
 	}
 	
 	@GetMapping("/loginOut")
-	public String getLoginOut() {
+	public String getLoginOut(HttpServletRequest request) {
+		request.getSession().invalidate();
 		loginService.loginOut();
 		return "redirect:login";
 	}

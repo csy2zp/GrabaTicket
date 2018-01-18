@@ -40,6 +40,8 @@ public class LoginServiceImpl implements ILoginService{
 	
 	@Autowired
 	private IImageService imageService;
+	@Autowired
+	private HttpKeepSessionUtil httpService;
 	
 	@Override
 	public boolean checkImg(String imgLocation) {
@@ -50,7 +52,7 @@ public class LoginServiceImpl implements ILoginService{
 					imgCoordinates += imgLocations[Integer.parseInt(i+"")] + ",";
 				}
 				imgCoordinates = imgCoordinates.substring(0, imgCoordinates.length()-1);
-				String result = HttpKeepSessionUtil.post(url1, "login_site=E&rand=sjrand&answer="+imgCoordinates);
+				String result = httpService.post(url1, "login_site=E&rand=sjrand&answer="+imgCoordinates);
 				log.info(result);
 				if(result.indexOf("\"result_code\":\"4\"") > 0) {
 					return true;
@@ -67,14 +69,14 @@ public class LoginServiceImpl implements ILoginService{
 	@Override
 	public boolean login(String username, String password) {
 		try {
-			String result = HttpKeepSessionUtil.post(url5,"appid=otn&username=" + username + "&password=" + password);
+			String result = httpService.post(url5,"appid=otn&username=" + username + "&password=" + password);
 			log.info(result);
-			result = HttpKeepSessionUtil.post(url2,"appid=otn");
+			result = httpService.post(url2,"appid=otn");
 			log.info(result);
 			ObjectMapper mapper = new ObjectMapper();
 			Map d = mapper.readValue(result, HashMap.class);
 			if(d.get("result_message").equals("验证通过")) {
-				result = HttpKeepSessionUtil.post(url6,"tk=" + d.get("newapptk"));
+				result = httpService.post(url6,"tk=" + d.get("newapptk"));
 				log.info(result);
 				if(result.indexOf("验证通过") > 0) {
 					return true;
@@ -92,18 +94,18 @@ public class LoginServiceImpl implements ILoginService{
 	public String init() {
 		
 		try {
-			String res = new String(HttpKeepSessionUtil.get(url3),"UTF-8");
+			String res = new String(httpService.get(url3),"UTF-8");
 			String param = res.substring(res.indexOf("/otn/dynamicJs/") + 15, res.indexOf("/otn/dynamicJs/") + 15 + 7);
-			HttpKeepSessionUtil.get(url7.replace("${param}", param));
-			res = HttpKeepSessionUtil.post(url2,"appid=otn");
+			httpService.get(url7.replace("${param}", param));
+			res = httpService.post(url2,"appid=otn");
 			log.info(res);
-			byte[] d = HttpKeepSessionUtil.get(url4);
-			res = new String(HttpKeepSessionUtil.get(url9),"UTF-8");
+			byte[] d = httpService.get(url4);
+			res = new String(httpService.get(url9),"UTF-8");
 			log.info(res);
 			res = res.replace("callbackFunction('", "").replace(")", "");
 			Map<String, String> data = mapper.readValue(res, HashMap.class);
-			HttpKeepSessionUtil.addCookie("RAIL_DEVICEID", data.get("dfp"), domain, "");
-			HttpKeepSessionUtil.addCookie("RAIL_EXPIRATION", data.get("exp"), domain, "");
+			httpService.addCookie("RAIL_DEVICEID", data.get("dfp"), domain, "");
+			httpService.addCookie("RAIL_EXPIRATION", data.get("exp"), domain, "");
 			return imageService.upload(d);
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -114,7 +116,7 @@ public class LoginServiceImpl implements ILoginService{
 	@Override
 	public void loginOut() {
 		try {
-			byte[] d = HttpKeepSessionUtil.get(url8);
+			byte[] d = httpService.get(url8);
 			log.info(new String(d,"UTF-8"));
 		} catch (Exception e) {
 			e.printStackTrace();
