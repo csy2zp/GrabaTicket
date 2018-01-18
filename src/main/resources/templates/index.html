@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+    <head>
+      	<meta charset="utf-8"/>
+  	    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+  	    <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"
+  	          name="viewport"/>
+  	    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+
+  	    <title>12306 - 购票</title>
+        <script src="/jquery-3.2.1.min.js"></script>
+        <script src="/main.js"></script>
+        <style type="text/css">
+          .form-horizontal{
+            width: 100%;
+            height: 100%;
+            text-align: center;
+          }
+          .form-control{
+            width: 300px;
+            margin-top: 10px;
+          }
+        </style>
+    </head>
+    <div><a href="/loginOut">退出</a></div>
+    <div class="form-horizontal">
+        <h1>12306购票</h1>
+      	<div class="form-group has-feedback">
+            <input type="text" class="form-control"
+                   name="stationTrainCode" placeholder="列车编号"/>
+            <span class="glyphicon glyphicon-envelope form-control-feedback"></span>
+        </div>
+        <div class="form-group has-feedback">
+            <input type="text" class="form-control"
+                   name="fromCity" placeholder="出发城市"/>
+            <span class="glyphicon glyphicon-lock form-control-feedback"></span>
+        </div>
+        <div class="form-group has-feedback">
+            <input type="text" class="form-control"
+                   name="toCity" placeholder="目标城市"/>
+            <span class="glyphicon glyphicon-lock form-control-feedback"></span>
+        </div>
+        <div class="form-group has-feedback">
+            <input type="text" class="form-control"
+                   name="trainDate" placeholder="出发时间(2018-02-20)"/>
+            <span class="glyphicon glyphicon-lock form-control-feedback"></span>
+        </div>
+        <div class="form-group has-feedback">
+          <select>
+            <option value ="1">硬座</option>
+            <option value ="2">软座</option>
+            <option value ="3">硬卧</option>
+            <option value ="4">动卧</option>
+            <option value ="5">软卧</option>
+            <option value ="6">高级软卧</option>
+            <option value="O">二等</option>
+            <option value="M">一等</option>
+            <option value="P">特等</option>
+          </select>
+        </div>
+        <div th:each="user : ${users}">
+            <input name="Fruit" type="checkbox" th:attr="value=${user}" th:text="${user}"/>
+        </div>
+        <div class="form-group has-feedback" style="display:none" id="imageLocation">
+            <input type="text" name="imageLocation" class="form-control" placeholder="验证码"/>
+        </div>
+        <div style="display:none" id="image">
+            <img th:src="${image}" id="validationImg"></img>
+        </div>
+        <div  class="form-group has-feedback">
+        	<button class="btn btn-primary btn-block btn-flat" onclick="sub()" style="width:100px;height: 40px">下单</button>
+            <img src="/loding.jpg" class="loding" style="width:40px;height: 40px;display:none"></img>
+        </div>
+    </div>
+    
+</html> 
