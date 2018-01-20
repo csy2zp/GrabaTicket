@@ -14,6 +14,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.csy.GrabaTicket.model.AutoBuyTicketModel;
 import com.csy.GrabaTicket.model.ConfirmOrderModel;
 import com.csy.GrabaTicket.model.PreOrderModel;
 import com.csy.GrabaTicket.service.IBuyTicketService;
@@ -48,6 +49,8 @@ public class BuyTicketServiceImpl implements IBuyTicketService {
 	private final static String[] imgLocations = {"","32,43","120,43","169,44","240,44","34,117","104,122","180,117","256,121"};
 	private final Log log = LogFactory.getLog(BuyTicketServiceImpl.class);
 	
+	private final static Map<String,StationCode> stationCodes = StationCodeUtil.getData();
+	
 	@Autowired
 	private IImageService imageService;
 	@Autowired
@@ -56,21 +59,9 @@ public class BuyTicketServiceImpl implements IBuyTicketService {
 	@SuppressWarnings("unchecked")
 	@Override
 	public Map<String,String> preOrder(PreOrderModel preOrderModel) {
-		Map<String,StationCode> stationCodes = StationCodeUtil.getData();
+		
 		try {
-			if(stationCodes.get(preOrderModel.getFromCity()) == null) {
-				throw new RuntimeException("出发城市不存在");
-			}
-			if(stationCodes.get(preOrderModel.getToCity()) == null) {
-				throw new RuntimeException("目标城市不存在");
-			}
-			httpService.get(url1);
-			byte[] result = httpService.get(url2.replace("${trainDate}", preOrderModel.getTrainDate())
-										.replace("${from}", stationCodes.get(preOrderModel.getFromCity()).getCode())
-										.replace("${to}", stationCodes.get(preOrderModel.getToCity()).getCode()));
-			addCookieByQueryZ(preOrderModel, stationCodes);
-			log.info(new String(result,"UTF-8"));
-			Map<String,Object> data = mapper.readValue(new String(result,"UTF-8"), HashMap.class);
+			Map<String,Object> data = mapper.readValue(queryZ(preOrderModel), HashMap.class);
 			data = (Map<String, Object>) data.get("data");
 			List<String> arr = (List<String>)data.get("result");
 			for(String train : arr) {
@@ -210,6 +201,47 @@ public class BuyTicketServiceImpl implements IBuyTicketService {
 			return users;
 		}
 		
+	}
+
+	@Override
+	public String getImage() {
+		byte[] imgData;
+		try {
+			imgData = httpService.get(url7);
+			String path = imageService.upload(imgData);
+			return path;
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw new RuntimeException(e.getMessage());
+		}
+	}
+
+	@Override
+	public Map<String, String> autoBuyTicket(AutoBuyTicketModel model) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	
+	private String queryZ(PreOrderModel preOrderModel) {
+		try {
+			if(stationCodes.get(preOrderModel.getFromCity()) == null) {
+				throw new RuntimeException("出发城市不存在");
+			}
+			if(stationCodes.get(preOrderModel.getToCity()) == null) {
+				throw new RuntimeException("目标城市不存在");
+			}
+			httpService.get(url1);
+			byte[] result = httpService.get(url2.replace("${trainDate}", preOrderModel.getTrainDate())
+										.replace("${from}", stationCodes.get(preOrderModel.getFromCity()).getCode())
+										.replace("${to}", stationCodes.get(preOrderModel.getToCity()).getCode()));
+			addCookieByQueryZ(preOrderModel, stationCodes);
+			String res = new String(result,"UTF-8"); 
+			log.info(res);
+			return res;
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw new RuntimeException(e.getMessage());
+		}
 	}
 	
 	private String sendQueryOrderWaitTime(ConfirmOrderModel confirmOrderModel) {
@@ -358,19 +390,6 @@ public class BuyTicketServiceImpl implements IBuyTicketService {
 			httpService.addCookie("_jc_save_toStation", URLEncoder.encode(preOrderModel.getToCity() + "," + data.get(preOrderModel.getToCity()).getCode(),"UTF-8"), domain, "");
 			httpService.addCookie("_jc_save_fromStation", URLEncoder.encode(preOrderModel.getFromCity() + "," + data.get(preOrderModel.getFromCity()).getCode(),"UTF-8"), domain, "");
 			httpService.addCookie("_jc_save_showIns", "true", domain, "");
-		} catch (Exception e) {
-			e.printStackTrace();
-			throw new RuntimeException(e.getMessage());
-		}
-	}
-
-	@Override
-	public String getImage() {
-		byte[] imgData;
-		try {
-			imgData = httpService.get(url7);
-			String path = imageService.upload(imgData);
-			return path;
 		} catch (Exception e) {
 			e.printStackTrace();
 			throw new RuntimeException(e.getMessage());

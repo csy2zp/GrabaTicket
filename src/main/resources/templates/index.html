@@ -11,6 +11,7 @@
   	    <title>12306 - 购票</title>
         <script src="/jquery-3.2.1.min.js"></script>
         <script src="/main.js"></script>
+        <script src="/websocket.js"></script>
         <style type="text/css">
           .form-horizontal{
             width: 100%;
@@ -63,7 +64,7 @@
             <input name="Fruit" type="checkbox" th:attr="value=${user}" th:text="${user}"/>
         </div>
         <div class="form-group has-feedback" style="display:none" id="imageLocation">
-            <input type="text" name="imageLocation" class="form-control" placeholder="验证码"/>
+            <input type="text" name="imageLocation" class="form-control" placeholder="图片验证码,填写图片顺序，从1开始"/>
         </div>
         <div style="display:none" id="image">
             <img th:src="${image}" id="validationImg"></img>

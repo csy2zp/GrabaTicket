@@ -1,6 +1,7 @@
 package com.csy.GrabaTicket.controller;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -26,12 +27,14 @@ public class LoginController {
 	
 	@PostMapping("/login")
 	public String login(HttpServletRequest request) {
+		HttpSession session = request.getSession();
 		String username = request.getParameter("username");
 		String password = request.getParameter("password");
 		String code = request.getParameter("code");
 		
 		if(loginService.checkImg(code)) {
 			if(loginService.login(username, password)) {
+				session.setAttribute("userName", username);
 				return "redirect:index";
 			}
 		}

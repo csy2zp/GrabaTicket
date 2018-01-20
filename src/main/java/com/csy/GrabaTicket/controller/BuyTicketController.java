@@ -48,4 +48,9 @@ public class BuyTicketController {
 		};
 		return data;
 	}
+	
+	@GetMapping("/auto_buy_ticket")
+	public String autoBuyTicket() {
+		return "autoBuyTicket";
+	}
 }
