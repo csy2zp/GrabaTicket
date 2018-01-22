@@ -14,7 +14,6 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.csy.GrabaTicket.model.AutoBuyTicketModel;
 import com.csy.GrabaTicket.model.ConfirmOrderModel;
 import com.csy.GrabaTicket.model.PreOrderModel;
 import com.csy.GrabaTicket.service.IBuyTicketService;
@@ -215,14 +214,8 @@ public class BuyTicketServiceImpl implements IBuyTicketService {
 			throw new RuntimeException(e.getMessage());
 		}
 	}
-
 	@Override
-	public Map<String, String> autoBuyTicket(AutoBuyTicketModel model) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-	
-	private String queryZ(PreOrderModel preOrderModel) {
+	public String queryZ(PreOrderModel preOrderModel) {
 		try {
 			if(stationCodes.get(preOrderModel.getFromCity()) == null) {
 				throw new RuntimeException("出发城市不存在");

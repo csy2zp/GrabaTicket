@@ -50,7 +50,8 @@ public class BuyTicketController {
 	}
 	
 	@GetMapping("/auto_buy_ticket")
-	public String autoBuyTicket() {
+	public String autoBuyTicket(Model model) {
+		model.addAttribute("users", buyTicket.listUser());
 		return "autoBuyTicket";
 	}
 }

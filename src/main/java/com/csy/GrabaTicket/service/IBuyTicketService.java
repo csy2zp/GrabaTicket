@@ -3,7 +3,6 @@ package com.csy.GrabaTicket.service;
 import java.util.List;
 import java.util.Map;
 
-import com.csy.GrabaTicket.model.AutoBuyTicketModel;
 import com.csy.GrabaTicket.model.ConfirmOrderModel;
 import com.csy.GrabaTicket.model.PreOrderModel;
 
@@ -27,6 +26,6 @@ public interface IBuyTicketService {
 	List<String> listUser();
 	
 	String getImage();
-
-	Map<String,String> autoBuyTicket(AutoBuyTicketModel model);
+	
+	public String queryZ(PreOrderModel preOrderModel);
 }

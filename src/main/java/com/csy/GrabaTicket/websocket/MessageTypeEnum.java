@@ -2,7 +2,9 @@ package com.csy.GrabaTicket.websocket;
 
 public enum MessageTypeEnum {
 	
-	BIND_CHANNEL_MESSAGE(1,"绑定通道消息");
+	AUTI_BUY_TICKET(1,"自动买票消息"),
+	STOP(2,"停止自动买票"),
+	PING(3,"ping");
 	
 	private int index;
 	
