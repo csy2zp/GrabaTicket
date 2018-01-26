@@ -13,7 +13,8 @@ var startWebSocket = function(){
        
       ws.onmessage = function (evt) 
       { 
-         var received_msg = evt.data;
+         var received_msg = JSON.parse(evt.data);
+         ws.send("{\"messageType\":2}")
          alert(received_msg.message);
       };
        

@@ -1,5 +1,4 @@
     var status = 1;
-    startWebSocket();
     var sub = function(){
         var stationTrainCode = $("input[name='stationTrainCode']").val();
         var fromCity = $("input[name='fromCity']").val();
@@ -75,7 +74,7 @@
                         "keyCheckIsChange=" + keyCheckIsChange + "&" +
                         "leftTicketStr=" + leftTicketStr + "&" +
                         "passengerTicketStr=" + passengerTicketStr + "&" +
-                        "oldPassengerStr=" + oldPassengerStr + 
+                        "oldPassengerStr=" + oldPassengerStr + "&" + 
                         "imageLocation=" + imageLocation;
             $.ajax({
                 contentType:"application/x-www-form-urlencoded",

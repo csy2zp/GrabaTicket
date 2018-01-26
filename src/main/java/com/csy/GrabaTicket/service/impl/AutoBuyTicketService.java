@@ -3,20 +3,15 @@ package com.csy.GrabaTicket.service.impl;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.csy.GrabaTicket.model.AutoBuyTicketModel;
 import com.csy.GrabaTicket.model.PreOrderModel;
 import com.csy.GrabaTicket.service.IBuyTicketService;
-import com.csy.GrabaTicket.websocket.request.AutoBuyTicketMessageRequest;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
-import io.netty.channel.Channel;
-import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 
 @SuppressWarnings("unchecked")
 @Service
@@ -25,59 +20,30 @@ public class AutoBuyTicketService {
 	@Autowired
 	private IBuyTicketService buyTicketService;
 	
-	private static ExecutorService threadPool = Executors.newFixedThreadPool(20);
 	private static ObjectMapper mapper = new ObjectMapper();
 	
-	public void start(Channel channel,AutoBuyTicketMessageRequest model){
-		stopThreadByName(channel.id().toString());
-		threadPool.execute(new Runnable() {		
-			@Override
-			public void run() {
-				try {
-					Thread.currentThread().setName(channel.id().toString());
-					while(Thread.currentThread().getName() != null) {
-						PreOrderModel preOrderModel = new PreOrderModel();
-						BeanUtils.copyProperties(preOrderModel, model);
-						Map<String,Object> data = mapper.readValue(buyTicketService.queryZ(preOrderModel), HashMap.class);
-						data = (Map<String, Object>) data.get("data");
-						List<String> arr = (List<String>)data.get("result");
-						String train = screeningTrain(model,arr);
-						if( train != null) {
-							preOrderModel.setStationTrainCode(train.split(",")[0]);
-							preOrderModel.setPassengerTicketStr(model.getPassengerTicketStr().replaceAll("#", train.split(",")[1]));
-							Map<String,String> res = buyTicketService.preOrder(preOrderModel);
-							if(res.get("status").equals("1") && res.get("messageStatus").equals("success")) {
-								channel.writeAndFlush(new TextWebSocketFrame("{\"messge\":\"success\"}"));
-								break;
-							}
-						}
-						Thread.sleep(5000);
-					}
-					
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
+	public Map<String,String> start(AutoBuyTicketModel model){
+		Map<String,String> res = new HashMap<>();
+		try {
+			PreOrderModel preOrderModel = new PreOrderModel();
+			BeanUtils.copyProperties(model,preOrderModel);
+			Map<String,Object> data = mapper.readValue(buyTicketService.queryZ(preOrderModel), HashMap.class);
+			data = (Map<String, Object>) data.get("data");
+			List<String> arr = (List<String>)data.get("result");
+			if( screeningTrain(model,arr,preOrderModel)) {
+				res.put("messageStatus", "success");
+				return res;
+			} else {
+				res.put("messageStatus", "fail");
+				return res;
 			}
-		});
-	}
-	
-	public void stop(Channel channel){
-		stopThreadByName(channel.id().toString());
-	}
-	
-	public void stopThreadByName(String name) {
-		ThreadGroup currentGroup = Thread.currentThread().getThreadGroup();
-		int noThreads = currentGroup.activeCount();
-		Thread[] lstThreads = new Thread[noThreads];
-		currentGroup.enumerate(lstThreads);
-		for (int i = 0; i < noThreads; i++) {
-			if(lstThreads[i].getName().equals(name)) {
-				lstThreads[i].setName(null);
-			}
+			
+		} catch (Exception e) {
+			throw new RuntimeException(e.getMessage());
 		}
 	}
 	
-	private String screeningTrain(AutoBuyTicketMessageRequest model,List<String> arr) {
+	private boolean screeningTrain(AutoBuyTicketModel model,List<String> arr,PreOrderModel preOrderModel) {
 		for(String train : arr) {
 			String[] data = train.split("\\|");
 			if(data[0].equals(""))
@@ -92,43 +58,124 @@ public class AutoBuyTicketService {
 			if(i == model.getPeriodTime().length)
 				continue;
 			//硬座
-			if(!data[29].equals("") && model.getTrainDate().contains("1")) {
-				return data[3] + ",1";
+			if(!data[29].equals("") && !data[29].equals("无") && model.getTrainDate().contains("1")) {
+				try {
+					preOrderModel.setStationTrainCode(data[3]);
+					preOrderModel.setPassengerTicketStr(model.getPassengerTicketStr().replaceAll("#","1"));
+					Map<String,String> res = buyTicketService.preOrder(preOrderModel);
+					if(res.get("status").equals("2") && res.get("messageStatus").equals("success")) {
+						return true;
+					}
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
 			}
 			//软座
-			if(!data[24].equals("") && model.getTrainDate().contains("2")) {
-				return data[3] + ",2";
+			if(!data[24].equals("") && !data[24].equals("无") && model.getTrainDate().contains("2")) {
+				try {
+					preOrderModel.setStationTrainCode(data[3]);
+					preOrderModel.setPassengerTicketStr(model.getPassengerTicketStr().replaceAll("#","2"));
+					Map<String,String> res = buyTicketService.preOrder(preOrderModel);
+					if(res.get("status").equals("2") && res.get("messageStatus").equals("success")) {
+						return true;
+					}
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
 			}
 			//硬卧
-			if(!data[28].equals("") && model.getTrainDate().contains("3")) {
-				return data[3] + ",3";
+			if(!data[28].equals("") && !data[28].equals("无") && model.getTrainDate().contains("3")) {
+				try {
+					preOrderModel.setStationTrainCode(data[3]);
+					preOrderModel.setPassengerTicketStr(model.getPassengerTicketStr().replaceAll("#","3"));
+					Map<String,String> res = buyTicketService.preOrder(preOrderModel);
+					if(res.get("status").equals("2") && res.get("messageStatus").equals("success")) {
+						return true;
+					}
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
 			}
 			//软卧
-			if(!data[23].equals("") && model.getTrainDate().contains("5")) {
-				return data[3] + ",5";
+			if(!data[23].equals("") && !data[23].equals("无") && model.getTrainDate().contains("5")) {
+				try {
+					preOrderModel.setStationTrainCode(data[3]);
+					preOrderModel.setPassengerTicketStr(model.getPassengerTicketStr().replaceAll("#","5"));
+					Map<String,String> res = buyTicketService.preOrder(preOrderModel);
+					if(res.get("status").equals("2") && res.get("messageStatus").equals("success")) {
+						return true;
+					}
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
 			}
 			//高级软卧
-			if(!data[21].equals("") && model.getTrainDate().contains("6")) {
-				return data[3] + ",6";
+			if(!data[21].equals("") && !data[21].equals("无") && model.getTrainDate().contains("6")) {
+				try {
+					preOrderModel.setStationTrainCode(data[3]);
+					preOrderModel.setPassengerTicketStr(model.getPassengerTicketStr().replaceAll("#","6"));
+					Map<String,String> res = buyTicketService.preOrder(preOrderModel);
+					if(res.get("status").equals("2") && res.get("messageStatus").equals("success")) {
+						return true;
+					}
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
 			}
 			//二等
-			if(!data[30].equals("") && model.getTrainDate().contains("O")) {
-				return data[3] + ",O";
+			if(!data[30].equals("") && !data[30].equals("无") && model.getTrainDate().contains("O")) {
+				try {
+					preOrderModel.setStationTrainCode(data[3]);
+					preOrderModel.setPassengerTicketStr(model.getPassengerTicketStr().replaceAll("#","O"));
+					Map<String,String> res = buyTicketService.preOrder(preOrderModel);
+					if(res.get("status").equals("2") && res.get("messageStatus").equals("success")) {
+						return true;
+					}
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
 			}
 			//一等
-			if(!data[31].equals("") && model.getTrainDate().contains("M")) {
-				return data[3] + ",M";
+			if(!data[31].equals("") && !data[31].equals("无") && model.getTrainDate().contains("M")) {
+				try {
+					preOrderModel.setStationTrainCode(data[3]);
+					preOrderModel.setPassengerTicketStr(model.getPassengerTicketStr().replaceAll("#","M"));
+					Map<String,String> res = buyTicketService.preOrder(preOrderModel);
+					if(res.get("status").equals("2") && res.get("messageStatus").equals("success")) {
+						return true;
+					}
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
 			}
 			//特等
-			if(!data[32].equals("") && model.getTrainDate().contains("P")) {
-				return data[3] + ",P";
+			if(!data[32].equals("") && !data[32].equals("无") && model.getTrainDate().contains("P")) {
+				try {
+					preOrderModel.setStationTrainCode(data[3]);
+					preOrderModel.setPassengerTicketStr(model.getPassengerTicketStr().replaceAll("#","P"));
+					Map<String,String> res = buyTicketService.preOrder(preOrderModel);
+					if(res.get("status").equals("2") && res.get("messageStatus").equals("success")) {
+						return true;
+					}
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
 			}
 			//动卧
-			if(!data[33].equals("") && model.getTrainDate().contains("4")) {
-				return data[3] + ",4";
+			if(!data[33].equals("") && !data[33].equals("无") && model.getTrainDate().contains("4")) {
+				try {
+					preOrderModel.setStationTrainCode(data[3]);
+					preOrderModel.setPassengerTicketStr(model.getPassengerTicketStr().replaceAll("#","4"));
+					Map<String,String> res = buyTicketService.preOrder(preOrderModel);
+					if(res.get("status").equals("2") && res.get("messageStatus").equals("success")) {
+						return true;
+					}
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
 			}
 			
 		}
-		return null;
+		return false;
 	}
 }

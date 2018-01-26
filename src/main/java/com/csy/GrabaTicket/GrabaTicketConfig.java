@@ -27,4 +27,5 @@ public class GrabaTicketConfig extends WebMvcConfigurerAdapter {
 		registry.addInterceptor(new LoginInterceptor()).addPathPatterns("/**");
 		super.addInterceptors(registry);
 	}
+	
 }

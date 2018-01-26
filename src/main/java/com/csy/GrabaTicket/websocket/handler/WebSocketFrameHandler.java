@@ -10,6 +10,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.csy.GrabaTicket.service.impl.AutoBuyTicketService;
 import com.csy.GrabaTicket.websocket.ChannelContainer;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -30,6 +31,8 @@ public class WebSocketFrameHandler extends SimpleChannelInboundHandler<WebSocket
 	
 	@Autowired
 	private ChannelContainer channels;
+	@Autowired
+	private AutoBuyTicketService autoBuyTicketService;
 	
 	@Autowired
 	public void setHandler(List<MessageHandler> messageHandlers) {

@@ -44,10 +44,6 @@ public class HttpKeepSessionUtil {
 	public  HttpClientContext context = null;
 	public  CookieStore cookieStore = null;
 	public  RequestConfig requestConfig = null;
-
-//	static {
-//		init();
-//	}
 	
 	public HttpKeepSessionUtil() {
 		init();

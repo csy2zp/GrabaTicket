@@ -17,7 +17,6 @@ public class StopMessageHandler implements MessageHandler<BaseMessageRequest> {
 	
 	@Override
 	public void handle(Channel channel, BaseMessageRequest baseMessageRequest) {
-		autoBuyTicketService.stopThreadByName(channel.id().toString());
 	}
 
 	@Override

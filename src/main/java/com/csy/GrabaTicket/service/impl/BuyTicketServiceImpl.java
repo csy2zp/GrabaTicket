@@ -329,7 +329,7 @@ public class BuyTicketServiceImpl implements IBuyTicketService {
 					"&passengerTicketStr=" +  preOrderModel.getPassengerTicketStr() +
 					"&oldPassengerStr=" + preOrderModel.getOldPassengerStr() + 
 					"&tour_flag=dc&randCode=&whatsSelect=1&_json_att=" + 
-					"&REPEAT_SUBMIT_TOKEN=" + cachData.get("globalRepeatSubmitToken");
+					"&REPEAT_SUBMIT_TOKEN=" + cachData.get("REPEAT_SUBMIT_TOKEN");
 			String res = httpService.post(url6, params);
 			log.info(res);
 			return res;

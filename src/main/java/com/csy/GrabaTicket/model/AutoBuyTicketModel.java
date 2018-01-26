@@ -1,6 +1,6 @@
-package com.csy.GrabaTicket.websocket.request;
+package com.csy.GrabaTicket.model;
 
-public class AutoBuyTicketMessageRequest extends BaseMessageRequest {
+public class AutoBuyTicketModel {
 	
 	/**
 	 * 开车日期
